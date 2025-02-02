@@ -37,14 +37,14 @@ if (isset($_GET['student_id'])) {
     exit();
 }
 
-
 $sql = "
-    SELECT i.student_id, i.name, a.status, 
-           a.time, a.paused_time, a.timeout_time, a.date  -- Include 'date' field
+    SELECT i.student_id, i.name, i.hours_required, a.status, 
+           a.time, a.paused_time, a.timeout_time, a.date  
     FROM interns i
     LEFT JOIN attendance a 
     ON i.student_id = a.student_id
     ORDER BY i.name";  
+ 
 $stmt = sqlsrv_query($conn, $sql);
 
 
@@ -99,68 +99,63 @@ if ($stmt === false) {
     <h1 style="margin-top:40px;">Internship Attendance Reports and Rendered Time</h1>
     
     <table border="1">
-        <tr>
-            <th>Student ID</th>
-            <th>Intern Name</th>
-            <th>Status</th>
-            <th>Time In</th>
-            <th>Total Rendered Time</th>
-            <th>Time Out</th>
-            <th>Attendance Date</th> 
-            <th>Mark Time Out</th>
-        </tr>
-        <?php
-        while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $time_display = ($row['time'] !== null) ? $row['time']->format('h:i A') : 'N/A';
-        
-            if ($row['paused_time'] !== null) {
-                $paused_time = $row['paused_time'];
-                $paused_time_display = $paused_time->format('h:i');
-            } else {
-                $paused_time_display = 'N/A';
-            }
+    <tr>
+        <th>Student ID</th>
+        <th>Intern Name</th>
+        <th>Status</th>
+        <th>Time In</th>
+        <th>Total Rendered Time</th>
+        <th>Hours Required</th> <!-- New Column -->
+        <th>Remaining Hours</th> <!-- New Column -->
+        <th>Time Out</th>
+        <th>Attendance Date</th>
+        <th>Mark Time Out</th>
+    </tr>
+    <?php
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+        $time_display = ($row['time'] !== null) ? $row['time']->format('h:i A') : 'N/A';
+        $timeout_time_display = ($row['timeout_time'] !== null) ? $row['timeout_time']->format('h:i A') : 'N/A';
+        $attendance_date_display = ($row['date'] !== null) ? (new DateTime($row['date']->format('Y-m-d H:i:s')))->format('F j, Y') : 'N/A';
 
-  
-            $timeout_time_display = ($row['timeout_time'] !== null) ? $row['timeout_time']->format('h:i A') : 'N/A';
+        $rendered_hours = 0;
+        if ($row['status'] == 'Present') {
+            $current_time = new DateTime();
+            $attendance_time = $row['time'];
+            $time_diff = $current_time->diff($attendance_time);
+            $rendered_time = $time_diff->format('%h hours, %i minutes');
+            $rendered_hours = $time_diff->h + ($time_diff->i / 60); // Convert to decimal hours
+        } elseif ($row['status'] == 'Time Out' && $row['paused_time'] !== null) {
+            $attendance_time = $row['time'];
+            $paused_time = $row['paused_time'];
+            $time_diff = $paused_time->diff($attendance_time);
+            $rendered_time = $time_diff->format('%h hours, %i minutes');
+            $rendered_hours = $time_diff->h + ($time_diff->i / 60);
+        } else {
+            $rendered_time = 'N/A';
+        }
 
-    
-            $attendance_date_display = ($row['date'] !== null) ? (new DateTime($row['date']->format('Y-m-d H:i:s')))->format('F j, Y') : 'N/A';
-        
-            if ($row['status'] == 'Present') {
-                $current_time = new DateTime();
-                $attendance_time = $row['time'];
+        $hours_required = $row['hours_required'] ?? 0;
+        $remaining_hours = max(0, $hours_required - $rendered_hours);
 
-                $time_diff = $current_time->diff($attendance_time);
-                $rendered_time = $time_diff->format('%h hours, %i minutes');
-            } elseif ($row['status'] == 'Time Out' && $row['paused_time'] !== null) {
-                $attendance_time = $row['time'];
-                $paused_time = $row['paused_time'];
-
-                $time_diff = $paused_time->diff($attendance_time);
-                $rendered_time = $time_diff->format('%h hours, %i minutes');
-            } else {
-                $rendered_time = 'N/A';
-            }
-
-            echo "<tr>
-            <td>" . $row['student_id'] . "</td>
-            <td>" . $row['name'] . "</td>
-            <td>" . $row['status'] . "</td>
-            <td>" . $time_display . "</td>
-            <td>" . $rendered_time . "</td>
-            <td>" . $timeout_time_display . "</td>
-            <td>" . $attendance_date_display . "</td>
+        echo "<tr>
+            <td>{$row['student_id']}</td>
+            <td>{$row['name']}</td>
+            <td>{$row['status']}</td>
+            <td>{$time_display}</td>
+            <td>{$rendered_time}</td>
+            <td>{$hours_required} hrs</td>
+            <td>{$remaining_hours} hrs</td>
+            <td>{$timeout_time_display}</td>
+            <td>{$attendance_date_display}</td>
             <td>
-                <a href='?student_id=" . $row['student_id'] . "' class='btn'>
+                <a href='?student_id={$row['student_id']}' class='btn'>
                     <i class='fa-regular fa-clock'></i> Time out
                 </a>
             </td>
-          </tr>";
-    
+        </tr>";
+    }
+    ?>
+</table>
 
-    
-        }    
-        ?>
-    </table>
 </body>
 </html>

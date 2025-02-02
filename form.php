@@ -16,6 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_intern'])) {
     $student_id = $_POST['student_id'];
     $name = $_POST['name'];
     $school = $_POST['school'];
+    $company = $_POST['company'];
+    $emercon = $_POST['emercon'];
+    $phone = $_POST['phone'];
     $start_date = $_POST['start_date'];
     $department = $_POST['department'];
     $hours_required = $_POST['hours_required'];
@@ -27,9 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_intern'])) {
     if (sqlsrv_has_rows($check_stmt)) {
         $message = "Error: The student ID already exists. Please enter a unique student ID.";
     } else {
-        $sql = "INSERT INTO interns (student_id, name, school, start_date, department, hours_required) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $params = [$student_id, $name, $school, $start_date, $department, $hours_required];
+        $sql = "INSERT INTO interns (student_id, name, school, company, emercon, phone, start_date, department, hours_required) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $params = [$student_id, $name, $school, $company, $emercon, $phone, $start_date, $department, $hours_required];
+
 
         $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -112,10 +116,19 @@ $stmt = sqlsrv_query($conn, $sql);
             <label for="school">School:</label>
             <input type="text" name="school" id="school" required value="">
 
+            <label for="company">Company Name:</label>
+            <input type="text" name="company" id="company" required value="">
+
+            <label for="emercon">Emergency Contact Person:</label>
+            <input type="text" name="emercon" id="emercon" required value="">
+
+            <label for="phone">Contact Number in Case of Emergency:</label>
+            <input type="tel" name="phone" id="phone" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX" title="Please enter a valid 11-digit PH contact number (e.g., 09123456789)" required>
+
             <label for="start_date">Start Date:</label>
             <input type="date" name="start_date" id="start_date" required value="">
 
-            <label for="department">Department:</label>
+            <label for="department">Intern Department:</label>
             <input type="text" name="department" id="department" required value="">
 
             <label for="hours_required">Hours Required:</label>
@@ -132,8 +145,11 @@ $stmt = sqlsrv_query($conn, $sql);
                 <th>Student ID</th>
                 <th>Intern Name</th>
                 <th>School</th>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Contact No.</th>
                 <th>Start Date</th>
-                <th>Department</th>
+                <th>Intern Department</th>
                 <th>Hours Required</th>
                 <th>Actions</th>
             </tr>
@@ -143,6 +159,9 @@ $stmt = sqlsrv_query($conn, $sql);
                         <td>" . $row['student_id'] . "</td>
                         <td>" . $row['name'] . "</td>
                         <td>" . $row['school'] . "</td>
+                        <td>" . $row['company'] . "</td>
+                        <td>" . $row['emercon'] . "</td>
+                        <td>" . $row['phone'] . "</td>
                         <td>" . $row['start_date']->format('F j, Y') . "</td>
                         <td>" . $row['department'] . "</td>
                         <td>" . $row['hours_required'] . "</td>

@@ -18,13 +18,24 @@ date_default_timezone_set('Asia/Manila');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mark_attendance'])) {
     $student_id = $_POST['student_id'];
-    $date = $_POST['date']; 
+    $date = $_POST['date'];
     $status = $_POST['status'];
-    $time = date("H:i:s"); 
+    $time = date("H:i:s");
 
     $formatted_date = date("F j, Y", strtotime($date));  
     $formatted_time = date("H:i:s", strtotime($time));  
 
+    // Fetch hours_required from interns table
+    $hours_query = "SELECT hours_required FROM interns WHERE student_id = ?";
+    $hours_stmt = sqlsrv_query($conn, $hours_query, [$student_id]);
+
+    if ($row = sqlsrv_fetch_array($hours_stmt, SQLSRV_FETCH_ASSOC)) {
+        $hours_required = $row['hours_required'];
+    } else {
+        $hours_required = 0; // Default if not found
+    }
+
+    // Check if attendance already exists for the given date
     $check_sql = "SELECT * FROM attendance WHERE student_id = ? AND date = ?";
     $check_params = [$student_id, $formatted_date];
     $check_stmt = sqlsrv_query($conn, $check_sql, $check_params);
@@ -32,10 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mark_attendance'])) {
     if (sqlsrv_has_rows($check_stmt)) {
         $message_date = "Attendance for this student on $formatted_date has already been marked!";
     } else {
-        
-        $sql = "INSERT INTO attendance (student_id, date, time, status) 
-                VALUES (?, ?, ?, ?)";
-        $params = [$student_id, $formatted_date, $formatted_time, $status];
+        // Insert attendance record
+        $sql = "INSERT INTO attendance (student_id, date, time, status, hours_required) 
+                VALUES (?, ?, ?, ?, ?)";
+        $params = [$student_id, $formatted_date, $formatted_time, $status, $hours_required];
 
         $stmt = sqlsrv_query($conn, $sql, $params);
 
@@ -46,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['mark_attendance'])) {
         $message = "Attendance marked successfully!";
     }
 }
+
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['delete_attendance_id'])) {
@@ -147,6 +159,7 @@ $stmt = sqlsrv_query($conn, $sql);
             <th>Date</th>
             <th>Time</th>
             <th>Status</th>
+            <th>hours_required</th>
             <th>Action</th>
         </tr>
         <?php
@@ -163,6 +176,7 @@ $stmt = sqlsrv_query($conn, $sql);
             <td>" . $row['date']->format('F j, Y') . "</td>
             <td>" . $row['time']->format('h:i A') . "</td>
             <td>" . $row['status'] . "</td>
+            <td>" . $row['hours_required'] . "</td>
             <td>
                 <a href='?delete_attendance_id=" . $row['attendance_id'] . "' 
                    class='btn' 
