@@ -99,6 +99,9 @@ $stmt = sqlsrv_query($conn, $sql);
 </a>
     </li>
     <li style="margin-top: 25px; margin-left: 20px; font-family: 'Robotolightnew', sans-serif; font-size: 18px;">
+                <a href="dashboard.php" style="text-decoration: none;">Dashboard</a>
+            </li>
+    <li style="margin-top: 25px; margin-left: 20px; font-family: 'Robotolightnew', sans-serif; font-size: 18px;">
         <a href="form.php" style="text-decoration: none;">Internship Registration Form</a>
     </li>
     <li style="margin-top: 25px; margin-left: 20px; font-family: 'Robotolightnew', sans-serif; font-size: 18px;">

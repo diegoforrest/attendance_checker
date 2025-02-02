@@ -80,7 +80,7 @@ $stmt = sqlsrv_query($conn, $sql);
     <nav>
         <ul style="list-style-type: none; padding: 0;">
             <li style="display: flex; align-items: center; margin-top: 10px;">
-                <a href="form.php" class="logo-link" style="display: flex; align-items: center; text-decoration: none;">
+                <a href="dashboard.php" class="logo-link" style="display: flex; align-items: center; text-decoration: none;">
                     <img src="image/icon-72.png" class="logo-img" style="max-height: 51px; margin-right: 10px;" />
                     <span class="logo-text" style="font-family: 'Robotolightnew', sans-serif; line-height: 1.2; text-align: left; font-size: 20px;">
                         Internship<br>Management
@@ -88,7 +88,7 @@ $stmt = sqlsrv_query($conn, $sql);
                 </a>
             </li>
             <li style="margin-top: 25px; margin-left: 20px; font-family: 'Robotolightnew', sans-serif; font-size: 18px;">
-                <a href="dashboard.php" style="text-decoration: none;">Dashboard</a>
+                <a href="form.php" style="text-decoration: none;">Registration Form</a>
             </li>
             <li style="margin-top: 25px; margin-left: 20px; font-family: 'Robotolightnew', sans-serif; font-size: 18px;">
                 <a href="attendance.php" style="text-decoration: none;">Internship Attendance</a>
@@ -99,63 +99,10 @@ $stmt = sqlsrv_query($conn, $sql);
         </ul>
     </nav>
 
-    <h1 style="margin-top:40px;">Internship Registration Form </h1>
-
-    <?php if (!empty($message)) { echo "<p style='color: red;'>$message</p>"; } ?>
-        <form method="POST">
-            <label for="student_id">Student ID:</label>
-            <input type="text" name="student_id" id="student_id" required value="">
-
-            <label for="name">Intern Name:</label>
-            <input type="text" name="name" id="name" required value="">
-
-            <label for="school">School:</label>
-            <input type="text" name="school" id="school" required value="">
-
-            <label for="start_date">Start Date:</label>
-            <input type="date" name="start_date" id="start_date" required value="">
-
-            <label for="department">Department:</label>
-            <input type="text" name="department" id="department" required value="">
-
-            <label for="hours_required">Hours Required:</label>
-            <input type="number" name="hours_required" id="hours_required" required value="">
-
-            <button class="btn2"type="submit" name="submit_intern">Add Intern</button>
-        </form>
-
-
-    <div class="table-section">
-    <h1> List of Registered Intern </h1>
-        <table>
-            <tr>
-                <th>Student ID</th>
-                <th>Intern Name</th>
-                <th>School</th>
-                <th>Start Date</th>
-                <th>Department</th>
-                <th>Hours Required</th>
-                <th>Actions</th>
-            </tr>
-            <?php
-            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                echo "<tr>
-                        <td>" . $row['student_id'] . "</td>
-                        <td>" . $row['name'] . "</td>
-                        <td>" . $row['school'] . "</td>
-                        <td>" . $row['start_date']->format('F j, Y') . "</td>
-                        <td>" . $row['department'] . "</td>
-                        <td>" . $row['hours_required'] . "</td>
-                        <td>
-                            <a href='?delete_id=" . $row['student_id'] . "' class='btn' onclick='return confirm(\"Are you sure?\")'>
-                                <i class='fa-regular fa-trash-can'></i> Delete
-                            </a>
-                        </td>
-                    </tr>";
-            }
-            ?>
-        </table>
-        </div>
+       <!-- Main Content -->
+       <div class="container">
+        <h1 style=" color: black;">Welcome! My.DLSU-D <br>
+        <span style="font-size: 35px;">Student Internship Monitoring System</span></h1>
 
 
 </body>
